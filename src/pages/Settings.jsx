@@ -32,8 +32,27 @@ const BUSINESS_TYPES = [
   { value: 'ecommerce', label: 'E-commerce' },
   { value: 'services', label: 'Services' },
   { value: 'agency', label: 'Agency' },
+  { value: 'consulting', label: 'Consulting' },
   { value: 'marketplace', label: 'Marketplace' },
+  { value: 'manufacturing', label: 'Manufacturing' },
+  { value: 'retail', label: 'Retail' },
+  { value: 'hospitality', label: 'Hospitality' },
+  { value: 'healthcare', label: 'Healthcare' },
+  { value: 'education', label: 'Education' },
   { value: 'other', label: 'Other' },
+];
+
+const TIMEZONES = [
+  { value: 'America/New_York', label: 'Eastern Time' },
+  { value: 'America/Chicago', label: 'Central Time' },
+  { value: 'America/Denver', label: 'Mountain Time' },
+  { value: 'America/Los_Angeles', label: 'Pacific Time' },
+  { value: 'America/Anchorage', label: 'Alaska Time' },
+  { value: 'Pacific/Honolulu', label: 'Hawaii Time' },
+  { value: 'Europe/London', label: 'London' },
+  { value: 'Europe/Paris', label: 'Paris' },
+  { value: 'Asia/Tokyo', label: 'Tokyo' },
+  { value: 'Australia/Sydney', label: 'Sydney' },
 ];
 
 const CURRENCIES = [
@@ -53,8 +72,12 @@ export default function Settings() {
   const queryClient = useQueryClient();
 
   const { data: businesses = [], isLoading } = useQuery({
-    queryKey: ['businesses'],
-    queryFn: () => base44.entities.Business.list('-created_date'),
+    queryKey: ['businesses', user?.email],
+    queryFn: async () => {
+      if (!user) return [];
+      return base44.entities.Business.filter({ created_by: user.email }, '-created_date');
+    },
+    enabled: !!user,
   });
 
   const { data: user } = useQuery({
@@ -183,9 +206,9 @@ export default function Settings() {
                               </span>
                             )}
                           </div>
-                          {business.type && (
+                          {(business.industry || business.type) && (
                             <p className="text-sm text-stone-500 capitalize mt-0.5">
-                              {BUSINESS_TYPES.find(t => t.value === business.type)?.label || business.type}
+                              {BUSINESS_TYPES.find(t => t.value === (business.industry || business.type))?.label || business.industry || business.type}
                             </p>
                           )}
                           {business.description && (
@@ -254,9 +277,10 @@ export default function Settings() {
 function BusinessForm({ business, onClose, onSave, saving }) {
   const [formData, setFormData] = useState({
     name: business?.name || '',
-    type: business?.type || '',
+    industry: business?.industry || business?.type || '',
     description: business?.description || '',
     currency: business?.currency || 'USD',
+    timezone: business?.timezone || 'America/New_York',
     monthly_burn_target: business?.monthly_burn_target || '',
   });
 
@@ -292,13 +316,13 @@ function BusinessForm({ business, onClose, onSave, saving }) {
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <Label className="text-stone-700">Type</Label>
+            <Label className="text-stone-700">Industry</Label>
             <Select
-              value={formData.type}
-              onValueChange={(value) => setFormData(prev => ({ ...prev, type: value }))}
+              value={formData.industry}
+              onValueChange={(value) => setFormData(prev => ({ ...prev, industry: value }))}
             >
               <SelectTrigger className="mt-1.5 rounded-xl border-stone-200">
-                <SelectValue placeholder="Select type" />
+                <SelectValue placeholder="Select industry" />
               </SelectTrigger>
               <SelectContent>
                 {BUSINESS_TYPES.map(type => (
@@ -328,6 +352,25 @@ function BusinessForm({ business, onClose, onSave, saving }) {
               </SelectContent>
             </Select>
           </div>
+        </div>
+
+        <div>
+          <Label className="text-stone-700">Timezone</Label>
+          <Select
+            value={formData.timezone}
+            onValueChange={(value) => setFormData(prev => ({ ...prev, timezone: value }))}
+          >
+            <SelectTrigger className="mt-1.5 rounded-xl border-stone-200">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {TIMEZONES.map(tz => (
+                <SelectItem key={tz.value} value={tz.value}>
+                  {tz.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         <div>
