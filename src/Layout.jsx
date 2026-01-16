@@ -36,9 +36,18 @@ export default function Layout({ children, currentPageName }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [selectedBusinessId, setSelectedBusinessId] = useState(null);
 
+  const { data: user } = useQuery({
+    queryKey: ['currentUser'],
+    queryFn: () => base44.auth.me(),
+  });
+
   const { data: businesses = [] } = useQuery({
-    queryKey: ['businesses'],
-    queryFn: () => base44.entities.Business.list(),
+    queryKey: ['businesses', user?.email],
+    queryFn: async () => {
+      if (!user) return [];
+      return base44.entities.Business.filter({ created_by: user.email }, '-created_date');
+    },
+    enabled: !!user,
   });
 
   useEffect(() => {
