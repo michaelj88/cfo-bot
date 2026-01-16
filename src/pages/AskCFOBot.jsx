@@ -39,6 +39,18 @@ export default function AskCFOBot() {
     enabled: !!businessId,
   });
 
+  const { data: statements = [] } = useQuery({
+    queryKey: ['statements', businessId],
+    queryFn: () => base44.entities.FinancialStatement.filter({ business_id: businessId }, '-period'),
+    enabled: !!businessId,
+  });
+
+  const { data: lineItems = [] } = useQuery({
+    queryKey: ['lineItems', businessId],
+    queryFn: () => base44.entities.StatementLineItem.filter({ business_id: businessId }, '-created_date', 50),
+    enabled: !!businessId,
+  });
+
   const { data: business } = useQuery({
     queryKey: ['business', businessId],
     queryFn: async () => {
@@ -49,6 +61,7 @@ export default function AskCFOBot() {
   });
 
   const latestSnapshot = snapshots[0];
+  const previousSnapshot = snapshots[1];
 
   const createConversation = useMutation({
     mutationFn: async (firstMessage) => {
@@ -105,13 +118,58 @@ export default function AskCFOBot() {
   const getFinancialContext = () => {
     if (!latestSnapshot) return 'No financial data available yet.';
     
-    return `Current financial situation for ${business?.name || 'the business'}:
-- Cash in bank: ${formatCurrency(latestSnapshot.cash_balance)}
+    const netMonthly = (latestSnapshot.revenue || 0) - (latestSnapshot.expenses || 0);
+    const runwayMonths = netMonthly < 0 
+      ? Math.floor(latestSnapshot.cash_balance / Math.abs(netMonthly))
+      : null;
+    
+    let context = `Current financial snapshot for ${business?.name || 'the business'}:
+- Cash on hand: ${formatCurrency(latestSnapshot.cash_balance)}
 - Monthly revenue: ${formatCurrency(latestSnapshot.revenue)}
 - Monthly expenses: ${formatCurrency(latestSnapshot.expenses)}
-- Net monthly: ${formatCurrency((latestSnapshot.revenue || 0) - (latestSnapshot.expenses || 0))}
-- Accounts receivable: ${formatCurrency(latestSnapshot.accounts_receivable)}
-- Accounts payable: ${formatCurrency(latestSnapshot.accounts_payable)}`;
+- Monthly profit/loss: ${formatCurrency(netMonthly)} ${netMonthly >= 0 ? '(profitable)' : '(burning cash)'}`;
+
+    if (runwayMonths !== null) {
+      context += `\n- Runway: ${runwayMonths} months at current burn rate`;
+    }
+
+    context += `\n- Accounts receivable: ${formatCurrency(latestSnapshot.accounts_receivable || 0)}
+- Accounts payable: ${formatCurrency(latestSnapshot.accounts_payable || 0)}`;
+
+    if (previousSnapshot) {
+      const revChange = latestSnapshot.revenue && previousSnapshot.revenue 
+        ? ((latestSnapshot.revenue - previousSnapshot.revenue) / previousSnapshot.revenue * 100).toFixed(0)
+        : null;
+      const expChange = latestSnapshot.expenses && previousSnapshot.expenses
+        ? ((latestSnapshot.expenses - previousSnapshot.expenses) / previousSnapshot.expenses * 100).toFixed(0)
+        : null;
+      
+      if (revChange) context += `\n- Revenue vs last month: ${revChange > 0 ? '+' : ''}${revChange}%`;
+      if (expChange) context += `\n- Expenses vs last month: ${expChange > 0 ? '+' : ''}${expChange}%`;
+    }
+
+    if (lineItems.length > 0) {
+      const recentCategories = {};
+      lineItems.slice(0, 20).forEach(item => {
+        if (!recentCategories[item.category]) {
+          recentCategories[item.category] = 0;
+        }
+        recentCategories[item.category] += item.amount || 0;
+      });
+      
+      const topCategories = Object.entries(recentCategories)
+        .sort((a, b) => Math.abs(b[1]) - Math.abs(a[1]))
+        .slice(0, 5);
+      
+      if (topCategories.length > 0) {
+        context += `\n\nRecent expense breakdown:`;
+        topCategories.forEach(([cat, amt]) => {
+          context += `\n- ${cat}: ${formatCurrency(Math.abs(amt))}`;
+        });
+      }
+    }
+
+    return context;
   };
 
   const processMessage = async (conversation, userMessage) => {
@@ -122,9 +180,15 @@ export default function AskCFOBot() {
     ).join('\n\n');
 
     const result = await base44.integrations.Core.InvokeLLM({
-      prompt: `You are CFO Bot, a calm, thoughtful virtual CFO for small business founders. 
-You're like a wise friend who happens to be great with numbers. You speak in plain language, 
-you're reassuring but honest, and you always ground your advice in the user's actual financial situation.
+      prompt: `You are CFO Bot, a calm, conservative, and supportive virtual CFO for small business founders. 
+You speak in plain language, you're reassuring but realistic, and you always ground your advice in the user's actual numbers.
+
+CORE PRINCIPLES:
+1. Always reference specific numbers from their data when available
+2. Clearly state any assumptions you're making
+3. Offer options and trade-offs instead of absolute answers
+4. Ask clarifying questions when data is missing or ambiguous
+5. Be conservative in projections and optimistic about capabilities
 
 ${getFinancialContext()}
 
@@ -133,9 +197,17 @@ ${messagesHistory}
 
 User's latest message: ${userMessage}
 
-Respond naturally and helpfully. If you reference numbers, explain what they mean in plain terms.
-Keep responses concise but warm. Use short paragraphs. Don't be overly formal or use jargon.
-If you don't have enough information to answer something, say so and suggest what data would help.`,
+RESPONSE GUIDELINES:
+- Start with the specific numbers relevant to their question
+- Explain what those numbers mean in plain terms
+- If making projections, state your assumptions clearly (e.g., "Assuming revenue stays flat...")
+- Present 2-3 options when possible, with trade-offs for each
+- If you need more info, ask specific questions about what would help
+- Keep paragraphs short (2-3 sentences max)
+- Use concrete examples when explaining concepts
+- Be conservative with recommendations but encouraging in tone
+
+If critical data is missing, say something like: "I don't see [specific data] in your snapshot yet. If you have that, it would help me give you a more accurate answer."`,
     });
 
     const updatedMessages = [
