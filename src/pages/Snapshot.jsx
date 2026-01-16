@@ -6,9 +6,10 @@ import Card from '@/components/shared/Card';
 import MetricCard from '@/components/shared/MetricCard';
 import EmptyState from '@/components/shared/EmptyState';
 import { Button } from "@/components/ui/button";
-import { Plus, Camera, TrendingUp, TrendingDown, Minus, Calendar } from 'lucide-react';
+import { Plus, Camera, TrendingUp, TrendingDown, Minus, Calendar, Upload } from 'lucide-react';
 import { format, parseISO, subMonths } from 'date-fns';
 import SnapshotForm from '@/components/snapshot/SnapshotForm';
+import StatementUploadForm from '@/components/snapshot/StatementUploadForm';
 
 function formatCurrency(amount) {
   if (amount === null || amount === undefined) return '—';
@@ -23,6 +24,7 @@ function formatCurrency(amount) {
 export default function Snapshot() {
   const [businessId, setBusinessId] = useState(localStorage.getItem('selectedBusinessId'));
   const [showForm, setShowForm] = useState(false);
+  const [showUploadForm, setShowUploadForm] = useState(false);
 
   useEffect(() => {
     const handler = (e) => setBusinessId(e.detail);
@@ -84,13 +86,23 @@ export default function Snapshot() {
         title="Snapshot"
         subtitle="Your current financial position at a glance"
         action={
-          <Button
-            onClick={() => setShowForm(true)}
-            className="bg-stone-900 hover:bg-stone-800 text-white rounded-xl px-5"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Update numbers
-          </Button>
+          <div className="flex gap-3">
+            <Button
+              onClick={() => setShowUploadForm(true)}
+              variant="outline"
+              className="rounded-xl"
+            >
+              <Upload className="w-4 h-4 mr-2" />
+              Upload Statement
+            </Button>
+            <Button
+              onClick={() => setShowForm(true)}
+              className="bg-stone-900 hover:bg-stone-800 text-white rounded-xl px-5"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Update numbers
+            </Button>
+          </div>
         }
       />
 
@@ -103,6 +115,14 @@ export default function Snapshot() {
             setShowForm(false);
           }}
           latestSnapshot={latestSnapshot}
+        />
+      )}
+
+      {showUploadForm && (
+        <StatementUploadForm
+          businessId={businessId}
+          onClose={() => setShowUploadForm(false)}
+          onSuccess={() => setShowUploadForm(false)}
         />
       )}
 
