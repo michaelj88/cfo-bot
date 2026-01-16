@@ -2,13 +2,47 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '../utils';
 import { Button } from "@/components/ui/button";
+import { base44 } from '@/api/base44Client';
 import { ArrowRight, Check } from 'lucide-react';
 
 export default function Home() {
+  const handleSignup = (provider) => {
+    const signupUrl = `${window.location.origin}/signup?provider=${provider}`;
+    window.location.href = signupUrl;
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-stone-50 to-white">
+      {/* Navigation */}
+      <nav className="border-b border-stone-200 bg-white/80 backdrop-blur-sm sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center">
+            <img 
+              src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/696a9c36c6b94fecaba3b1c3/eb5fb9eeb_cfo-bot-logo-1.png" 
+              alt="CFO Bot" 
+              className="h-10"
+            />
+          </div>
+          <div className="flex items-center gap-3">
+            <Button 
+              variant="ghost" 
+              onClick={() => base44.auth.redirectToLogin()}
+              className="text-stone-700"
+            >
+              Sign in
+            </Button>
+            <Button 
+              onClick={() => base44.auth.redirectToLogin()}
+              className="bg-stone-900 hover:bg-stone-800 text-white rounded-xl"
+            >
+              Get started
+            </Button>
+          </div>
+        </div>
+      </nav>
+
       {/* Hero */}
-      <section className="px-6 pt-20 pb-24 lg:pt-32 lg:pb-32">
+      <section className="px-6 pt-16 pb-20 lg:pt-24 lg:pb-28">
         <div className="max-w-3xl mx-auto text-center">
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-semibold text-stone-900 tracking-tight leading-tight">
             You shouldn't carry these decisions alone
@@ -18,17 +52,55 @@ export default function Home() {
             and make better financial decisions — without the anxiety or guesswork.
           </p>
           <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to={createPageUrl('Snapshot')}>
-              <Button className="bg-stone-900 hover:bg-stone-800 text-white rounded-xl px-8 py-6 text-lg">
-                Get your Snapshot
-                <ArrowRight className="ml-2 w-5 h-5" />
-              </Button>
-            </Link>
+            <Button 
+              onClick={() => base44.auth.redirectToLogin()}
+              className="bg-stone-900 hover:bg-stone-800 text-white rounded-xl px-8 py-6 text-lg"
+            >
+              Get your Snapshot
+              <ArrowRight className="ml-2 w-5 h-5" />
+            </Button>
             <a href="#how-it-works">
               <Button variant="outline" className="rounded-xl px-8 py-6 text-lg border-stone-200 hover:bg-stone-50">
                 See how it works
               </Button>
             </a>
+          </div>
+          <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center items-center">
+            <p className="text-sm text-stone-500">Sign up with:</p>
+            <div className="flex flex-wrap gap-2 justify-center">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleSignup('google')}
+                className="rounded-xl"
+              >
+                Google
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleSignup('facebook')}
+                className="rounded-xl"
+              >
+                Facebook
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleSignup('linkedin')}
+                className="rounded-xl"
+              >
+                LinkedIn
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleSignup('microsoft')}
+                className="rounded-xl"
+              >
+                Microsoft
+              </Button>
+            </div>
           </div>
         </div>
       </section>
@@ -322,12 +394,13 @@ export default function Home() {
           <p className="text-lg text-stone-600 mb-10">
             No credit card required. Start with your first Snapshot and see where you stand.
           </p>
-          <Link to={createPageUrl('Snapshot')}>
-            <Button className="bg-stone-900 hover:bg-stone-800 text-white rounded-xl px-8 py-6 text-lg">
-              Get your Snapshot
-              <ArrowRight className="ml-2 w-5 h-5" />
-            </Button>
-          </Link>
+          <Button 
+            onClick={() => base44.auth.redirectToLogin()}
+            className="bg-stone-900 hover:bg-stone-800 text-white rounded-xl px-8 py-6 text-lg"
+          >
+            Get your Snapshot
+            <ArrowRight className="ml-2 w-5 h-5" />
+          </Button>
           <p className="text-sm text-stone-400 mt-6">
             Takes 2 minutes to get started
           </p>
@@ -337,11 +410,12 @@ export default function Home() {
       {/* Footer */}
       <footer className="px-6 py-12 border-t border-stone-100">
         <div className="max-w-4xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-6">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-stone-900 flex items-center justify-center">
-              <span className="text-white text-sm font-semibold">C</span>
-            </div>
-            <span className="text-lg font-semibold text-stone-800">CFO Bot</span>
+          <div className="flex items-center">
+            <img 
+              src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/696a9c36c6b94fecaba3b1c3/eb5fb9eeb_cfo-bot-logo-1.png" 
+              alt="CFO Bot" 
+              className="h-8"
+            />
           </div>
           <p className="text-sm text-stone-400">
             Your calm financial partner
