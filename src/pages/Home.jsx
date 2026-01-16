@@ -45,7 +45,7 @@ export default function Home() {
       <section className="px-6 pt-16 pb-20 lg:pt-24 lg:pb-28">
         <div className="max-w-3xl mx-auto text-center">
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-semibold text-stone-900 tracking-tight leading-tight">
-            Finance without fear
+            Finance without fear.
           </h1>
           <p className="mt-6 text-lg sm:text-xl text-stone-600 max-w-2xl mx-auto leading-relaxed">
             CFO Bot helps you understand your numbers, see what's ahead, 
