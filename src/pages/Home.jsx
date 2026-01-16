@@ -21,13 +21,13 @@ export default function Home() {
           <div className="flex items-center gap-3">
             <Button 
               variant="ghost" 
-              onClick={() => base44.auth.redirectToLogin(createPageUrl('Snapshot'))}
+              onClick={() => base44.auth.redirectToLogin('/Snapshot')}
               className="text-stone-700"
             >
               Sign in
             </Button>
             <Button 
-              onClick={() => base44.auth.redirectToLogin(createPageUrl('Snapshot'))}
+              onClick={() => base44.auth.redirectToLogin('/Snapshot')}
               className="bg-stone-900 hover:bg-stone-800 text-white rounded-xl"
             >
               Get started
@@ -48,7 +48,7 @@ export default function Home() {
           </p>
           <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
             <Button 
-              onClick={() => base44.auth.redirectToLogin(createPageUrl('Snapshot'))}
+              onClick={() => base44.auth.redirectToLogin('/Snapshot')}
               className="bg-stone-900 hover:bg-stone-800 text-white rounded-xl px-8 py-6 text-lg"
             >
               Get your Snapshot
@@ -353,7 +353,7 @@ export default function Home() {
             No credit card required. Start with your first Snapshot and see where you stand.
           </p>
           <Button 
-            onClick={() => base44.auth.redirectToLogin(createPageUrl('Snapshot'))}
+            onClick={() => base44.auth.redirectToLogin('/Snapshot')}
             className="bg-stone-900 hover:bg-stone-800 text-white rounded-xl px-8 py-6 text-lg"
           >
             Get your Snapshot
