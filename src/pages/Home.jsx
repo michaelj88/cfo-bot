@@ -6,11 +6,6 @@ import { base44 } from '@/api/base44Client';
 import { ArrowRight, Check } from 'lucide-react';
 
 export default function Home() {
-  const handleSignup = (provider) => {
-    const signupUrl = `${window.location.origin}/signup?provider=${provider}`;
-    window.location.href = signupUrl;
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-b from-stone-50 to-white">
       {/* Navigation */}
@@ -64,43 +59,6 @@ export default function Home() {
                 See how it works
               </Button>
             </a>
-          </div>
-          <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center items-center">
-            <p className="text-sm text-stone-500">Sign up with:</p>
-            <div className="flex flex-wrap gap-2 justify-center">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleSignup('google')}
-                className="rounded-xl"
-              >
-                Google
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleSignup('facebook')}
-                className="rounded-xl"
-              >
-                Facebook
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleSignup('linkedin')}
-                className="rounded-xl"
-              >
-                LinkedIn
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleSignup('microsoft')}
-                className="rounded-xl"
-              >
-                Microsoft
-              </Button>
-            </div>
           </div>
         </div>
       </section>
