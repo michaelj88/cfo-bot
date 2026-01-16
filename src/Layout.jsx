@@ -99,7 +99,7 @@ export default function Layout({ children, currentPageName }) {
           <div className="flex items-center h-16 px-6 border-b border-stone-100">
             <div className="flex items-center gap-3">
               <img 
-                src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/696a9c36c6b94fecaba3b1c3/eb5fb9eeb_cfo-bot-logo-1.png" 
+                src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/696a9c36c6b94fecaba3b1c3/d8bd4bc5f_cfo-bot-logo-small.png" 
                 alt="CFO Bot" 
                 className="w-8 h-8"
               />
@@ -182,7 +182,7 @@ export default function Layout({ children, currentPageName }) {
         <div className="flex items-center justify-between h-14 px-4">
           <div className="flex items-center gap-2">
             <img 
-              src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/696a9c36c6b94fecaba3b1c3/eb5fb9eeb_cfo-bot-logo-1.png" 
+              src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/696a9c36c6b94fecaba3b1c3/d8bd4bc5f_cfo-bot-logo-small.png" 
               alt="CFO Bot" 
               className="w-7 h-7"
             />
