@@ -71,6 +71,11 @@ export default function Settings() {
   const [editingBusiness, setEditingBusiness] = useState(null);
   const queryClient = useQueryClient();
 
+  const { data: user } = useQuery({
+    queryKey: ['currentUser'],
+    queryFn: () => base44.auth.me(),
+  });
+
   const { data: businesses = [], isLoading } = useQuery({
     queryKey: ['businesses', user?.email],
     queryFn: async () => {
@@ -78,11 +83,6 @@ export default function Settings() {
       return base44.entities.Business.filter({ created_by: user.email }, '-created_date');
     },
     enabled: !!user,
-  });
-
-  const { data: user } = useQuery({
-    queryKey: ['currentUser'],
-    queryFn: () => base44.auth.me(),
   });
 
   const createBusiness = useMutation({
