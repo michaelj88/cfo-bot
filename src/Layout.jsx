@@ -35,6 +35,11 @@ const navItems = [
 export default function Layout({ children, currentPageName }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [selectedBusinessId, setSelectedBusinessId] = useState(null);
+  
+  // Hide layout chrome on Home page
+  if (currentPageName === 'Home') {
+    return <>{children}</>;
+  }
 
   const { data: user } = useQuery({
     queryKey: ['currentUser'],

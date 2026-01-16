@@ -1,19 +1,19 @@
-import Snapshot from './pages/Snapshot';
-import Forecast from './pages/Forecast';
-import Decisions from './pages/Decisions';
 import AskCFOBot from './pages/AskCFOBot';
-import Settings from './pages/Settings';
+import Decisions from './pages/Decisions';
+import Forecast from './pages/Forecast';
 import Home from './pages/Home';
+import Settings from './pages/Settings';
+import Snapshot from './pages/Snapshot';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
-    "Snapshot": Snapshot,
-    "Forecast": Forecast,
-    "Decisions": Decisions,
     "AskCFOBot": AskCFOBot,
-    "Settings": Settings,
+    "Decisions": Decisions,
+    "Forecast": Forecast,
     "Home": Home,
+    "Settings": Settings,
+    "Snapshot": Snapshot,
 }
 
 export const pagesConfig = {
