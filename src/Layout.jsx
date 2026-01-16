@@ -181,9 +181,11 @@ export default function Layout({ children, currentPageName }) {
       <header className="lg:hidden fixed top-0 inset-x-0 z-50 bg-white border-b border-stone-200">
         <div className="flex items-center justify-between h-14 px-4">
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-stone-900 flex items-center justify-center">
-              <span className="text-white text-xs font-semibold">C</span>
-            </div>
+            <img 
+              src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/696a9c36c6b94fecaba3b1c3/eb5fb9eeb_cfo-bot-logo-1.png" 
+              alt="CFO Bot" 
+              className="w-7 h-7"
+            />
             <span className="font-semibold text-stone-800">CFO Bot</span>
           </div>
           <button
