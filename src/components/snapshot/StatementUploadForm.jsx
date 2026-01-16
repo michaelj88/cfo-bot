@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { X, Upload, FileText, Loader2 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import Card from '../shared/Card';
+import StatementReviewStep from './StatementReviewStep';
 
 const STATEMENT_TYPES = [
   { value: 'profit_loss', label: 'Profit & Loss Statement' },
@@ -17,6 +18,9 @@ const STATEMENT_TYPES = [
 export default function StatementUploadForm({ businessId, onClose, onSuccess }) {
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const [showReview, setShowReview] = useState(false);
+  const [extractedData, setExtractedData] = useState(null);
+  const [statementId, setStatementId] = useState(null);
   const [formData, setFormData] = useState({
     statement_type: '',
     period: '',
@@ -37,6 +41,46 @@ export default function StatementUploadForm({ businessId, onClose, onSuccess }) 
     }
   };
 
+  const suggestCategory = async (lineName, businessId) => {
+    const previousMappings = await base44.entities.StatementLineItem.filter(
+      { business_id: businessId },
+      '-created_date',
+      100
+    );
+    
+    const normalizedName = lineName.toLowerCase().trim();
+    const match = previousMappings.find(m => 
+      m.line_name.toLowerCase().trim() === normalizedName
+    );
+    
+    if (match) return { category: match.category, is_suggested: true };
+    
+    const defaultMapping = {
+      'revenue': 'Revenue',
+      'sales': 'Revenue',
+      'income': 'Revenue',
+      'cogs': 'Cost of Goods Sold',
+      'cost of sales': 'Cost of Goods Sold',
+      'salary': 'Payroll',
+      'wages': 'Payroll',
+      'payroll': 'Payroll',
+      'marketing': 'Marketing',
+      'advertising': 'Marketing',
+      'software': 'Software',
+      'saas': 'Software',
+      'rent': 'Rent',
+      'lease': 'Rent',
+    };
+    
+    for (const [key, value] of Object.entries(defaultMapping)) {
+      if (normalizedName.includes(key)) {
+        return { category: value, is_suggested: false };
+      }
+    }
+    
+    return { category: 'Other', is_suggested: false };
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -49,7 +93,7 @@ export default function StatementUploadForm({ businessId, onClose, onSuccess }) 
     try {
       const { file_url } = await base44.integrations.Core.UploadPrivateFile({ file });
       
-      await base44.entities.FinancialStatement.create({
+      const statement = await base44.entities.FinancialStatement.create({
         business_id: businessId,
         file_url,
         file_name: file.name,
@@ -58,8 +102,41 @@ export default function StatementUploadForm({ businessId, onClose, onSuccess }) 
         notes: formData.notes,
       });
 
-      onSuccess?.();
-      onClose();
+      setStatementId(statement.id);
+
+      const extractionResult = await base44.integrations.Core.ExtractDataFromUploadedFile({
+        file_url,
+        json_schema: {
+          type: 'object',
+          properties: {
+            line_items: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  line_name: { type: 'string' },
+                  amount: { type: 'number' }
+                }
+              }
+            }
+          }
+        }
+      });
+
+      if (extractionResult.status === 'success' && extractionResult.output?.line_items) {
+        const itemsWithCategories = await Promise.all(
+          extractionResult.output.line_items.map(async (item) => {
+            const suggestion = await suggestCategory(item.line_name, businessId);
+            return { ...item, ...suggestion };
+          })
+        );
+        
+        setExtractedData(itemsWithCategories);
+        setShowReview(true);
+      } else {
+        onSuccess?.();
+        onClose();
+      }
     } catch (error) {
       alert('Failed to upload statement. Please try again.');
       console.error(error);
@@ -67,6 +144,20 @@ export default function StatementUploadForm({ businessId, onClose, onSuccess }) 
       setUploading(false);
     }
   };
+
+  if (showReview && extractedData) {
+    return (
+      <StatementReviewStep
+        businessId={businessId}
+        statementId={statementId}
+        lineItems={extractedData}
+        onComplete={() => {
+          onSuccess?.();
+          onClose();
+        }}
+      />
+    );
+  }
 
   return (
     <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-4">
